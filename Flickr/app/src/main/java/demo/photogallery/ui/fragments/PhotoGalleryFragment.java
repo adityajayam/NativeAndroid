@@ -2,6 +2,7 @@ package demo.photogallery.ui.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -25,6 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.util.List;
 
 import demo.photogallery.FlickrFetcher;
@@ -33,6 +41,7 @@ import demo.photogallery.adapters.PhotoAdapter;
 import demo.photogallery.databinding.FragmentPhotoGalleryBinding;
 import demo.photogallery.model.GalleryItem;
 import demo.photogallery.services.PollService;
+import demo.photogallery.tasks.FetchItemsTask;
 import demo.photogallery.util.DialogUtil;
 import demo.photogallery.util.QueryPreferences;
 import demo.photogallery.util.ThumbnailDownloader;
@@ -41,11 +50,11 @@ import demo.photogallery.viewmodel.PhotoListViewModel;
 public class PhotoGalleryFragment extends VisibleFragment {
     private static String TAG = "PhotoGalleryFragment";
     private FragmentPhotoGalleryBinding fragmentPhotoGalleryBinding;
-    private static PhotoAdapter photoAdapter;
-    private static int page_count = 1;
-    private ThumbnailDownloader<PhotoAdapter.PhotoHolder> mThumbnailDownloader;
-    private static Dialog progressDialog;
+    private PhotoAdapter photoAdapter;
+    //private ThumbnailDownloader<PhotoAdapter.PhotoHolder> mThumbnailDownloader;
+    //private static Dialog progressDialog;
     private PhotoListViewModel photoListViewModel;
+    private Activity mActivity;
 
     public static Fragment newInstance() {
         return new PhotoGalleryFragment();
@@ -56,16 +65,19 @@ public class PhotoGalleryFragment extends VisibleFragment {
         super.onCreate(bundle);
         setRetainInstance(true);
         setHasOptionsMenu(true);
-        updateItems();
+        mActivity = getActivity();
         photoListViewModel = new PhotoListViewModel();
+        //If you are using the HandlerThread way to download images then uncomment the below code and comment the rest part like threadpool
+        //executor and third party libraries
 /*
         StrictMode.enableDefaults();
-        TrafficStats.setThreadStatsTag(getActivity().getApplication().getApplicationInfo().uid);
+        TrafficStats.setThreadStatsTag(mActivity.getApplication().getApplicationInfo().uid);
 */
         //UI thread has a Looper created for it implicitly
         //Create the Handler. It will implicitly bind to the Looper
         //that is internally created for this thread (since it is the UI thread)
-        Handler responseHandler = new Handler();
+        //Handler responseHandler = new Handler();
+/*
         mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
         mThumbnailDownloader.setThumbnailDownloadListener(new ThumbnailDownloader.ThumbnailDownloadListener<PhotoAdapter.PhotoHolder>() {
             @Override
@@ -77,13 +89,13 @@ public class PhotoGalleryFragment extends VisibleFragment {
         mThumbnailDownloader.start();
         mThumbnailDownloader.getLooper();
         Log.i(TAG, "Background thread started");
+*/
     }
 
     private void updateItems() {
-        progressDialog = new Dialog(getActivity());
-        String query = QueryPreferences.getStoredQuery(getActivity());
-        DialogUtil.showProgressDialogBar(progressDialog, "Downloading images...");
-        new FetchItemsTask(query).execute();
+        String query = QueryPreferences.getStoredQuery(mActivity);
+        DialogUtil.showProgressDialogBar(mActivity, "Downloading images...");
+        new FetchItemsTask(query, photoAdapter).execute();
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -94,6 +106,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
         if (view == null) {
             view = new View(activity);
         }
+        assert imm != null;
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
@@ -107,8 +120,8 @@ public class PhotoGalleryFragment extends VisibleFragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "QueryTextSubmit: " + query);
-                hideKeyboard(getActivity());
-                QueryPreferences.setStoredQuery(getActivity(), query);
+                hideKeyboard(mActivity);
+                QueryPreferences.setStoredQuery(mActivity, query);
                 updateItems();
                 return true;
             }
@@ -119,15 +132,12 @@ public class PhotoGalleryFragment extends VisibleFragment {
                 return false;
             }
         });
-        searchView.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String query = QueryPreferences.getStoredQuery(getActivity());
-                searchView.setQuery(query, false);
-            }
+        searchView.setOnSearchClickListener(v -> {
+            String query = QueryPreferences.getStoredQuery(mActivity);
+            searchView.setQuery(query, false);
         });
         MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
-        if (PollService.isServiceAlarmOn(getActivity())) {
+        if (PollService.isServiceAlarmOn(mActivity)) {
             toggleItem.setTitle(R.string.stop_polling);
         } else {
             toggleItem.setTitle(R.string.start_polling);
@@ -139,14 +149,14 @@ public class PhotoGalleryFragment extends VisibleFragment {
         super.onOptionsItemSelected(menuItem);
         switch (menuItem.getItemId()) {
             case R.id.menu_item_clear:
-                QueryPreferences.setStoredQuery(getActivity(), null);
+                QueryPreferences.setStoredQuery(mActivity, null);
 
                 updateItems();
                 return true;
             case R.id.menu_item_toggle_polling:
-                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
-                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
-                getActivity().invalidateOptionsMenu();
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(mActivity);
+                PollService.setServiceAlarm(mActivity, shouldStartAlarm);
+                mActivity.invalidateOptionsMenu();
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
@@ -156,13 +166,13 @@ public class PhotoGalleryFragment extends VisibleFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mThumbnailDownloader.clearQueue();
+        //mThumbnailDownloader.clearQueue();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mThumbnailDownloader.quit();
+        //mThumbnailDownloader.quit();
         Log.i(TAG, "Background thread destroyed");
     }
 
@@ -170,64 +180,29 @@ public class PhotoGalleryFragment extends VisibleFragment {
     public View onCreateView(@NonNull LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         super.onCreateView(layoutInflater, viewGroup, bundle);
         fragmentPhotoGalleryBinding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_photo_gallery, viewGroup, false);
-        fragmentPhotoGalleryBinding.photoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        fragmentPhotoGalleryBinding.photoRecyclerView.setLayoutManager(new GridLayoutManager(mActivity, 3));
         setupAdapter();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            fragmentPhotoGalleryBinding.photoRecyclerView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    if (!fragmentPhotoGalleryBinding.photoRecyclerView.canScrollVertically(1)) {
-                        updateItems();
-                        Log.e(TAG, "End of scroll");
-                    }
-                }
-            });
-        }
+        updateItems();
+        fragmentPhotoGalleryBinding.photoRecyclerView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (!fragmentPhotoGalleryBinding.photoRecyclerView.canScrollVertically(1)) {
+                updateItems();
+                Log.e(TAG, "End of scroll");
+            }
+        });
         fragmentPhotoGalleryBinding.setPhotoListViewModel(photoListViewModel);
         initObservables();
         return fragmentPhotoGalleryBinding.getRoot();
     }
 
     public void initObservables() {
-        photoListViewModel.getMutableLiveData().observe(this, status -> {
-            Log.e(TAG, "Selected Position: " + status);
-        });
+        photoListViewModel.getMutableLiveData().observe(this, status -> Log.e(TAG, "Selected Position: " + status));
     }
 
     private void setupAdapter() {
         if (isAdded()) {
-            photoAdapter = new PhotoAdapter(getActivity(), mThumbnailDownloader);
+            photoAdapter = new PhotoAdapter(mActivity, null);//mThumbnailDownloader);
             fragmentPhotoGalleryBinding.photoRecyclerView.setAdapter(photoAdapter);
         }
     }
 
-    private static class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
-        private String mQuery;
-
-        public FetchItemsTask(String query) {
-            mQuery = query;
-        }
-
-        @Override
-        protected List<GalleryItem> doInBackground(Void... Void) {
-
-            //return new FlickrFetcher().fetchItems(String.valueOf(page_count));
-            if (mQuery == null) {
-                return new FlickrFetcher().fetchRecentPhotos(String.valueOf(page_count));
-            } else {
-                return new FlickrFetcher().searchPhotos(mQuery, String.valueOf(page_count));
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<GalleryItem> items) {
-            DialogUtil.closeDialog(progressDialog);
-            if (page_count == 1) {
-                photoAdapter.addNewPhotosForNewSearch(items);
-            } else {
-                photoAdapter.addNewPhotos(items);
-            }
-            page_count++;
-        }
-    }
 }

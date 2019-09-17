@@ -18,7 +18,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     private static final String TAG = "ThumbnailDownloader";
     private static final int MESSAGE_DOWNLOAD = 0;
     private boolean mHasQuit = false;
-    private Handler mRequestHandler;
+    private static Handler mRequestHandler;
     private Handler mResponseHandler;
     private ConcurrentMap<T, String> mRequestMap = new ConcurrentHashMap<>();
     private ThumbnailDownloadListener<T> mThumbnailDownloadListener;
@@ -75,7 +75,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             mResponseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mRequestMap.get(target) != url || mHasQuit) {
+                    if (!mRequestMap.get(target).equals(url) || mHasQuit) {
                         return;
                     }
                     mRequestMap.remove(target);

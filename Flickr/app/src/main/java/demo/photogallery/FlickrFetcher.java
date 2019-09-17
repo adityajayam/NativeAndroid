@@ -19,7 +19,7 @@ import demo.photogallery.model.GalleryItem;
 
 public class FlickrFetcher {
     private static final String TAG = "FlickrFetchr";
-    private static final String API_KEY = "fa90dfc2a1e9da2b407f981829e0ded0";
+    private static final String API_KEY = "8ab8b56dcaf60672b80b4474d699d80f";
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
     private final Uri END_POINT = Uri.parse("https://api.flickr.com/services/rest/")
@@ -39,7 +39,7 @@ public class FlickrFetcher {
             if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 throw new IOException(httpURLConnection.getResponseMessage() + "with" + urlSpec);
             }
-            int bytesRead = 0;
+            int bytesRead;
             byte[] buffer = new byte[1024];
             while ((bytesRead = inputStream.read(buffer)) > 0) {
                 out.write(buffer, 0, bytesRead);
@@ -56,7 +56,7 @@ public class FlickrFetcher {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> downloadGalleryItems(String url) {
+    private List<GalleryItem> downloadGalleryItems(String url) {
         List<GalleryItem> items = new ArrayList<>();
         Log.i(TAG, "Url: " + url);
         try {
