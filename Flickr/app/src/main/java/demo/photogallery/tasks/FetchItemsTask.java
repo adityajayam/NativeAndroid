@@ -22,22 +22,22 @@ public class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
     @Override
     protected List<GalleryItem> doInBackground(Void... Void) {
         if (mQuery == null) {
-            return new FlickrFetcher().fetchRecentPhotos(String.valueOf(FlickrApplication.getPage_count()));
+            return new FlickrFetcher().fetchRecentPhotos(String.valueOf(FlickrApplication.getPageCount()));
         } else {
-            return new FlickrFetcher().searchPhotos(mQuery, String.valueOf(FlickrApplication.getPage_count()));
+            return new FlickrFetcher().searchPhotos(mQuery, String.valueOf(FlickrApplication.getPageCount()));
         }
     }
 
     @Override
     protected void onPostExecute(List<GalleryItem> items) {
         DialogUtil.closeDialog();
-        int page_count = FlickrApplication.getPage_count();
+        int page_count = FlickrApplication.getPageCount();
         if (page_count == 1) {
             mPhotoAdapter.addNewPhotosForNewSearch(items);
         } else {
             mPhotoAdapter.addNewPhotos(items);
         }
         page_count++;
-        FlickrApplication.setPage_count(page_count);
+        FlickrApplication.setPageCount(page_count);
     }
 }

@@ -1,22 +1,15 @@
 package demo.photogallery.ui.fragments;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.TrafficStats;
-import android.os.AsyncTask;
-import android.os.Build;
+
+import androidx.databinding.DataBindingUtil;
+
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.StrictMode;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.SearchView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,25 +19,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-import java.util.List;
-
-import demo.photogallery.FlickrFetcher;
 import demo.photogallery.R;
 import demo.photogallery.adapters.PhotoAdapter;
 import demo.photogallery.databinding.FragmentPhotoGalleryBinding;
-import demo.photogallery.model.GalleryItem;
 import demo.photogallery.services.PollService;
 import demo.photogallery.tasks.FetchItemsTask;
 import demo.photogallery.util.DialogUtil;
 import demo.photogallery.util.QueryPreferences;
-import demo.photogallery.util.ThumbnailDownloader;
 import demo.photogallery.viewmodel.PhotoListViewModel;
 
 public class PhotoGalleryFragment extends VisibleFragment {

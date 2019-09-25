@@ -13,9 +13,9 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.SystemClock;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+
 import android.util.Log;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import demo.photogallery.FlickrFetcher;
 import demo.photogallery.R;
 import demo.photogallery.model.GalleryItem;
-import demo.photogallery.ui.activities.PhotoGalleryActivity;
+import demo.photogallery.ui.activities.MainActivity;
 import demo.photogallery.util.QueryPreferences;
 
 public class PollService extends IntentService {
@@ -75,7 +75,7 @@ public class PollService extends IntentService {
             //notification
             createNotificationChannel();
             Resources resources = getResources();
-            Intent i = PhotoGalleryActivity.newIntent(this);
+            Intent i = MainActivity.newIntent(this);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
             NotificationCompat.Builder notification = new NotificationCompat.Builder(this, CHANNEL_ID)

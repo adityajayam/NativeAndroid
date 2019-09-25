@@ -1,24 +1,17 @@
 package demo.photogallery.adapters;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.databinding.DataBindingUtil;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-
-import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import demo.photogallery.PhotoThreadPoolDownload;
 import demo.photogallery.R;
-import demo.photogallery.ThumbnailDownloadTask;
 import demo.photogallery.databinding.ListItemGalleryBinding;
 import demo.photogallery.model.GalleryItem;
 import demo.photogallery.util.ThumbnailDownloader;
@@ -52,8 +45,8 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoHolder>
 
         //For ThreadPool executor way we first need to create a task which downloads the photo and then pass that to the ThreadPool executor, then depending
         //on the free threads in the pool each and every task will be executed on a background thread.
-        ThumbnailDownloadTask thumbnailDownloadTask = new ThumbnailDownloadTask(mContext, holder, mGalleryItems.get(position).getmUrl());
-        PhotoThreadPoolDownload.getInstance().startDownload(thumbnailDownloadTask);
+        /*ThumbnailDownloadTask thumbnailDownloadTask = new ThumbnailDownloadTask(mContext, holder, mGalleryItems.get(position).getmUrl());
+        PhotoThreadPoolDownload.getInstance().startDownload(thumbnailDownloadTask);*/
 
         //If using any third party library like picasso or glide no need of the below code.
         /*holder.listItemGalleryBinding.itemImageView.setImageDrawable(mGalleryItems.get(position).getmDrawable());

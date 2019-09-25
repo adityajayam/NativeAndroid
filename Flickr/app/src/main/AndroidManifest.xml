@@ -18,24 +18,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.activities.PhotoGalleryActivity">
+        <activity android:name=".ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".services.PollService" />
+
         <receiver android:name=".receiver.StartupReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.NotificationReceiver"
+        <receiver
+            android:name=".receiver.NotificationReceiver"
             android:exported="false">
             <intent-filter android:priority="-999">
-                <action
-                    android:name="demo.photogallery.SHOW_NOTIFICATION"/>
+                <action android:name="demo.photogallery.SHOW_NOTIFICATION" />
             </intent-filter>
         </receiver>
     </application>

@@ -1,4 +1,4 @@
-package demo.photogallery;
+package demo.photogallery.threadPoolAndTask;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,6 +10,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import demo.photogallery.FlickrFetcher;
 import demo.photogallery.adapters.PhotoAdapter;
 
 public class ThumbnailDownloadTask<T> implements Runnable {

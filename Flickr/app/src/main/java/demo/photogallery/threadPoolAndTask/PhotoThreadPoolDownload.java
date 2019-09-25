@@ -1,4 +1,4 @@
-package demo.photogallery;
+package demo.photogallery.threadPoolAndTask;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

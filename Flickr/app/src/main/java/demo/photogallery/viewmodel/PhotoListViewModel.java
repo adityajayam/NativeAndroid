@@ -1,7 +1,7 @@
 package demo.photogallery.viewmodel;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 public class PhotoListViewModel extends ViewModel {
     private final MutableLiveData<Integer> mutableLiveData;
