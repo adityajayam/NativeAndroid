@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.appcompat.widget.SearchView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,16 +20,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
 import demo.photogallery.R;
 import demo.photogallery.adapters.PhotoAdapter;
 import demo.photogallery.databinding.FragmentPhotoGalleryBinding;
+import demo.photogallery.interfaces.ImageClickInterface;
 import demo.photogallery.services.PollService;
 import demo.photogallery.tasks.FetchItemsTask;
 import demo.photogallery.util.DialogUtil;
 import demo.photogallery.util.QueryPreferences;
 import demo.photogallery.viewmodel.PhotoListViewModel;
 
-public class PhotoGalleryFragment extends VisibleFragment {
+public class PhotoGalleryFragment extends VisibleFragment implements ImageClickInterface {
     private static String TAG = "PhotoGalleryFragment";
     private FragmentPhotoGalleryBinding fragmentPhotoGalleryBinding;
     private PhotoAdapter photoAdapter;
@@ -175,15 +179,24 @@ public class PhotoGalleryFragment extends VisibleFragment {
         return fragmentPhotoGalleryBinding.getRoot();
     }
 
-    public void initObservables() {
+    private void initObservables() {
         photoListViewModel.getMutableLiveData().observe(this, status -> Log.e(TAG, "Selected Position: " + status));
+    }
+
+    private void callBottomSheet() {
+        BottomSheetDialogFragment bottomSheetDialogFragment = new BottomSheetFragment();
+        bottomSheetDialogFragment.show(getFragmentManager(), bottomSheetDialogFragment.getTag());
     }
 
     private void setupAdapter() {
         if (isAdded()) {
-            photoAdapter = new PhotoAdapter(mActivity, null);//mThumbnailDownloader);
+            photoAdapter = new PhotoAdapter(mActivity, null, this);//mThumbnailDownloader);
             fragmentPhotoGalleryBinding.photoRecyclerView.setAdapter(photoAdapter);
         }
     }
 
+    @Override
+    public void onClickImage(int position) {
+        callBottomSheet();
+    }
 }

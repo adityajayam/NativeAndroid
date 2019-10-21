@@ -1,18 +1,25 @@
 package demo.photogallery.adapters;
 
 import android.content.Context;
+
 import androidx.databinding.DataBindingUtil;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import demo.photogallery.FlickrApplication;
 import demo.photogallery.R;
 import demo.photogallery.databinding.ListItemGalleryBinding;
+import demo.photogallery.interfaces.ImageClickInterface;
 import demo.photogallery.model.GalleryItem;
 import demo.photogallery.util.ThumbnailDownloader;
 
@@ -20,12 +27,14 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoHolder>
     private List<GalleryItem> mGalleryItems;
     private Context mContext;
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
+    private ImageClickInterface imageClickInterface;
     private static final String TAG = "PhotoAdapter";
 
-    public PhotoAdapter(Context context, ThumbnailDownloader<PhotoHolder> thumbnailDownloader) {
+    public PhotoAdapter(Context context, ThumbnailDownloader<PhotoHolder> thumbnailDownloader, ImageClickInterface imageClickInterface) {
         mGalleryItems = new ArrayList<>();
         mContext = context;
         mThumbnailDownloader = thumbnailDownloader;
+        this.imageClickInterface = imageClickInterface;
     }
 
     @NonNull
@@ -52,10 +61,18 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoHolder>
         /*holder.listItemGalleryBinding.itemImageView.setImageDrawable(mGalleryItems.get(position).getmDrawable());
         holder.listItemGalleryBinding.setPosition(position);
         holder.listItemGalleryBinding.getRoot().setTag(position);*/
-
+        holder.listItemGalleryBinding.setPosition(position);
+        holder.listItemGalleryBinding.itemImageView.setOnClickListener(v -> {
+            Log.e(TAG, "Selected Image position");
+            Drawable drawable = holder.listItemGalleryBinding.itemImageView.getDrawable();
+            GalleryItem galleryItem = mGalleryItems.get(position);
+            galleryItem.setmDrawable(drawable);
+            FlickrApplication.setSelectedGalleryItem(galleryItem);
+            imageClickInterface.onClickImage(position);
+        });
         //Third party libraries to download the images.
         //Picasso.get().load(mGalleryItems.get(position).getmUrl()).into(holder.listItemGalleryBinding.itemImageView);
-        //Glide.with(mContext).load(mGalleryItems.get(position).getmUrl()).into(holder.listItemGalleryBinding.itemImageView);
+        Glide.with(mContext).load(mGalleryItems.get(position).getmUrl()).into(holder.listItemGalleryBinding.itemImageView);
     }
 
     @Override
@@ -69,6 +86,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoHolder>
         public PhotoHolder(ListItemGalleryBinding listItemGalleryBinding) {
             super(listItemGalleryBinding.getRoot());
             this.listItemGalleryBinding = listItemGalleryBinding;
+            listItemGalleryBinding.executePendingBindings();
         }
     }
 
