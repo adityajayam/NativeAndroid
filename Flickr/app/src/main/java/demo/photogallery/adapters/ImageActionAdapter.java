@@ -11,16 +11,20 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import demo.photogallery.R;
+import demo.photogallery.interfaces.ImageClickInterface;
 
 public class ImageActionAdapter extends BaseAdapter {
 
     private Context mContext;
+    private ImageClickInterface mImageClickInterface;
+
     private String[] actionNames = new String[]{"Share", "Get Link", "Download"};
 
     private int[] actionDrawables = new int[]{R.drawable.ic_action_share, R.drawable.ic_action_copy_link, R.drawable.ic_action_download};
 
-    public ImageActionAdapter(Context context) {
+    public ImageActionAdapter(Context context, ImageClickInterface imageClickInterface) {
         mContext = context;
+        mImageClickInterface = imageClickInterface;
     }
 
     @Override
@@ -51,6 +55,12 @@ public class ImageActionAdapter extends BaseAdapter {
         } else {
             imageActionViewHolder = (ImageActionViewHolder) convertView.getTag();
         }
+        imageActionViewHolder.imageActionRowItemLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mImageClickInterface.onClickImage(position);
+            }
+        });
         imageActionViewHolder.actionItemName.setText(actionNames[position]);
         imageActionViewHolder.actionItemImageView.setImageResource(actionDrawables[position]);
         return convertView;
