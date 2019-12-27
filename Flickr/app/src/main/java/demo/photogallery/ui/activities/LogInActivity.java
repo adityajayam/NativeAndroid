@@ -18,13 +18,17 @@ import demo.photogallery.R;
 
 public class LogInActivity extends AppCompatActivity {
 
+    private BiometricPrompt.PromptInfo promptInfo;
+    private BiometricPrompt biometricPrompt;
+    private static final String TAG = "LogInActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         Executor executor = ContextCompat.getMainExecutor(this);
-        BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
+        biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
             @Override
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
@@ -49,29 +53,33 @@ public class LogInActivity extends AppCompatActivity {
                         .show();
             }
         });
-        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Biometric login for my app")
                 .setSubtitle("Log in using your biometric credential")
                 .setNegativeButtonText("Use account password")
                 .build();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         BiometricManager biometricManager = BiometricManager.from(this);
 
         switch (biometricManager.canAuthenticate()) {
             case BiometricManager.BIOMETRIC_SUCCESS:
-                Log.d("MY_APP_TAG", "App can authenticate using biometrics.");
+                Log.d(TAG, "App can authenticate using biometrics.");
                 biometricPrompt.authenticate(promptInfo);
                 break;
             case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
-                Log.e("MY_APP_TAG", "No biometric features available on this device.");
+                Log.e(TAG, "No biometric features available on this device.");
                 startMainActivity();
                 break;
             case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
-                Log.e("MY_APP_TAG", "Biometric features are currently unavailable.");
+                Log.e(TAG, "Biometric features are currently unavailable.");
                 startMainActivity();
                 break;
             case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
-                Log.e("MY_APP_TAG", "The user hasn't associated " +
+                Log.e(TAG, "The user hasn't associated " +
                         "any biometric credentials with their account.");
                 startSecuritySettings();
                 break;
