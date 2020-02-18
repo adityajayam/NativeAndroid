@@ -1,15 +1,22 @@
 package demo.photogallery.ui.activities;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import java.util.concurrent.Executor;
@@ -26,7 +33,7 @@ public class LogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        handleUIModeChanges(null);
         Executor executor = ContextCompat.getMainExecutor(this);
         biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
             @Override
@@ -58,6 +65,50 @@ public class LogInActivity extends AppCompatActivity {
                 .setSubtitle("Log in using your biometric credential")
                 .setNegativeButtonText("Use account password")
                 .build();
+    }
+
+    private void handleUIModeChanges(Configuration newConfig) {
+        int currentNightMode;
+        if (newConfig != null) {
+            currentNightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        } else {
+            currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        }
+        ActionBar actionbar = getSupportActionBar();
+        ImageView fingerPrintImage = findViewById(R.id.fingerPrintImageView);
+        ConstraintLayout constraintLayout = findViewById(R.id.container);
+        TextView subtitleText = findViewById(R.id.subtitleText);
+        subtitleText.setText(R.string.login_type_hint_text);
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                // Night mode is not active, we're using the light theme
+                fingerPrintImage.setImageResource(R.drawable.ic_action_finger_print);
+                constraintLayout.setBackgroundColor(getResources().getColor(R.color.whiteColor, null));
+                subtitleText.setTextColor(getResources().getColor(R.color.blackColor, null));
+                if (actionbar != null) {
+                    actionbar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.whiteColor, null)));
+                    actionbar.setTitle((Html.fromHtml("<font color=\"#000000\">" + getString(R.string.app_name) + "</font>", 0)));
+                }
+                getWindow().setStatusBarColor(getResources().getColor(R.color.blackColor, null));
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                // Night mode is active, we're using dark theme
+                fingerPrintImage.setImageResource(R.drawable.ic_action_finger_print_light);
+                constraintLayout.setBackgroundColor(getResources().getColor(R.color.greyColor, null));
+                subtitleText.setTextColor(getResources().getColor(R.color.whiteColor, null));
+                if (actionbar != null) {
+                    actionbar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.greyColor, null)));
+                    actionbar.setTitle((Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.app_name) + "</font>", 0)));
+                }
+                getWindow().setStatusBarColor(getResources().getColor(R.color.blackColor, null));
+                break;
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        handleUIModeChanges(newConfig);
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override

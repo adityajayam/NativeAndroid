@@ -47,7 +47,6 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoHolder>
 
     @Override
     public void onBindViewHolder(@NonNull PhotoHolder holder, int position) {
-        Log.e(TAG, String.valueOf(position));
         //If you are using the HandlerThread way to download images then uncomment the below code and comment the rest part like threadpool
         //executor and third party libraries
         //mThumbnailDownloader.queueThumbnail(holder, mGalleryItems.get(position).getmUrl());

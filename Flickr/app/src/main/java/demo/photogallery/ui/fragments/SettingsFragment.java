@@ -1,5 +1,6 @@
 package demo.photogallery.ui.fragments;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,22 +27,16 @@ import demo.photogallery.viewmodel.SettingsViewModel;
 
 public class SettingsFragment extends Fragment implements Spinner.OnItemSelectedListener {
 
-    private SettingsViewModel settingsViewModel;
     private List<String> spinnerData;
     private Spinner themeSpinner;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        settingsViewModel =
-                ViewModelProviders.of(this).get(SettingsViewModel.class);
+        SettingsViewModel settingsViewModel = ViewModelProviders.of(this).get(SettingsViewModel.class);
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
+        handleUIModeChanges(root);
         final TextView textView = root.findViewById(R.id.textView_select_theme);
-        settingsViewModel.getText().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        settingsViewModel.getText().observe(this, textView::setText);
         themeSpinner = root.findViewById(R.id.spinner_theme);
         spinnerData = new ArrayList<>();
         spinnerData.add("DEFAULT");
@@ -71,5 +66,20 @@ public class SettingsFragment extends Fragment implements Spinner.OnItemSelected
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    private void handleUIModeChanges(View root) {
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        final TextView textView = root.findViewById(R.id.textView_select_theme);
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                // Night mode is not active, we're using the light theme
+                textView.setTextColor(getResources().getColor(R.color.blackColor, null));
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                // Night mode is active, we're using dark theme
+                textView.setTextColor(getResources().getColor(R.color.whiteColor, null));
+                break;
+        }
     }
 }
